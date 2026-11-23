@@ -43,8 +43,12 @@ jobs:
           tools: wp-cli
           coverage: none
 
-      - name: Install Plugin Check command
-        run: wp package install wp-cli/plugin-check-command
+      - name: Install latest WP-CLI
+        run: |
+          curl -fsSL -o /tmp/wp-cli.phar https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          chmod +x /tmp/wp-cli.phar
+          sudo mv /tmp/wp-cli.phar /usr/local/bin/wp
+          wp --version
 
       - name: Set up WordPress for plugin check
         run: |
