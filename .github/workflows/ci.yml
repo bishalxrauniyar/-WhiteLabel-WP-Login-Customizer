@@ -32,9 +32,9 @@ jobs:
       - name: Set up WordPress for plugin check
         run: |
           sudo service mysql start
-          mysql -e 'CREATE DATABASE IF NOT EXISTS wordpress;'
+          sudo mysql -e "CREATE DATABASE IF NOT EXISTS wordpress; CREATE USER IF NOT EXISTS 'wp'@'localhost' IDENTIFIED BY 'wp'; GRANT ALL PRIVILEGES ON wordpress.* TO 'wp'@'localhost'; FLUSH PRIVILEGES;"
           wp core download --path=wp --version=latest
-          wp config create --path=wp --dbname=wordpress --dbuser=root --dbpass='' --dbhost=localhost --skip-check
+          wp config create --path=wp --dbname=wordpress --dbuser=wp --dbpass=wp --dbhost=localhost --skip-check
           wp core install --path=wp \
             --url=http://example.test \
             --title=CI \
