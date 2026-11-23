@@ -43,6 +43,9 @@ jobs:
           tools: wp-cli
           coverage: none
 
+      - name: Install Plugin Check command
+        run: wp package install wp-cli/plugin-check-command
+
       - name: Set up WordPress for plugin check
         run: |
           wp core download --path=wp --version=latest
