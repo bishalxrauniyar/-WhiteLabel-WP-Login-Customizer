@@ -16,6 +16,20 @@ jobs:
     name: PHP lint, JS syntax and plugin check
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: wordpress
+          MYSQL_DATABASE: wordpress
+        ports:
+          - 3307:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -pwordpress"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
     steps:
       - name: Checkout plugin
         uses: actions/checkout@v4
@@ -31,10 +45,8 @@ jobs:
 
       - name: Set up WordPress for plugin check
         run: |
-          sudo service mysql start
-          sudo mysql -e "CREATE DATABASE IF NOT EXISTS wordpress; CREATE USER IF NOT EXISTS 'wp'@'localhost' IDENTIFIED BY 'wp'; GRANT ALL PRIVILEGES ON wordpress.* TO 'wp'@'localhost'; FLUSH PRIVILEGES;"
           wp core download --path=wp --version=latest
-          wp config create --path=wp --dbname=wordpress --dbuser=wp --dbpass=wp --dbhost=localhost --skip-check
+          wp config create --path=wp --dbname=wordpress --dbuser=root --dbpass=wordpress --dbhost=127.0.0.1:3307 --skip-check
           wp core install --path=wp \
             --url=http://example.test \
             --title=CI \
