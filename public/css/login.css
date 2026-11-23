@@ -3,34 +3,34 @@
  * Dynamic values are provided by inline CSS generated in Frontend::get_css().
  */
 
-body.login.wl-login-customized #login {
+body.login.wlwp-login-customized #login {
 	padding-top: 32px;
 }
 
-body.login.wl-login-customized #login h1 {
+body.login.wlwp-login-customized #login h1 {
 	text-align: center;
 }
 
-body.login.wl-login-customized #login form p {
+body.login.wlwp-login-customized #login form p {
 	margin-bottom: 16px;
 }
 
-body.login.wl-login-customized #login form p.submit {
+body.login.wlwp-login-customized #login form p.submit {
 	margin-bottom: 4px;
 }
 
-body.login.wl-login-customized #login form .forgetmenot {
+body.login.wlwp-login-customized #login form .forgetmenot {
 	margin: 4px 0 18px;
 }
 
-body.login.wl-login-customized #login form .input {
+body.login.wlwp-login-customized #login form .input {
 	box-sizing: border-box;
 	width: 100%;
 	min-height: 42px;
 	margin: 0;
 }
 
-body.login.wl-login-customized #login form input[type="submit"] {
+body.login.wlwp-login-customized #login form input[type="submit"] {
 	width: 100%;
 	min-height: 44px;
 	margin: 0;
@@ -38,40 +38,40 @@ body.login.wl-login-customized #login form input[type="submit"] {
 	cursor: pointer;
 }
 
-body.login.wl-login-customized #login .wl-login-message {
+body.login.wlwp-login-customized #login .wlwp-login-message {
 	text-align: center;
 	margin: 0 0 18px;
 }
 
-body.login.wl-login-customized .wl-login-footer {
+body.login.wlwp-login-customized .wlwp-login-footer {
 	text-align: center;
 	margin: 18px 0 0;
 }
 
-body.login.wl-login-customized #backtoblog:empty {
+body.login.wlwp-login-customized #backtoblog:empty {
 	display: none;
 }
 
 /* Keep the language switcher and privacy link readable on custom backgrounds. */
-body.login.wl-login-customized .login-language-dropdown,
-body.login.wl-login-customized .privacy-policy-page-link {
+body.login.wlwp-login-customized .login-language-dropdown,
+body.login.wlwp-login-customized .privacy-policy-page-link {
 	text-align: center;
 }
 
-body.login.wl-login-customized .login-language-dropdown select {
+body.login.wlwp-login-customized .login-language-dropdown select {
 	max-width: 100%;
 }
 
 /* Center the links below the form on the stock login screen. */
-body.login.wl-login-customized #login #nav,
-body.login.wl-login-customized #login #backtoblog {
+body.login.wlwp-login-customized #login #nav,
+body.login.wlwp-login-customized #login #backtoblog {
 	width: 100%;
 	margin: 14px 0 0;
 	padding: 0;
 	text-align: center;
 }
 
-body.login.wl-login-customized #login #nav a,
-body.login.wl-login-customized #login #backtoblog a {
+body.login.wlwp-login-customized #login #nav a,
+body.login.wlwp-login-customized #login #backtoblog a {
 	display: inline-block;
 }

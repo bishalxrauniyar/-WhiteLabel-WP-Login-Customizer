@@ -53,6 +53,7 @@ final class Frontend {
 	 * Register the shortcode used to place the form on any WordPress page.
 	 */
 	public function register_shortcodes() {
+		add_shortcode( 'wlwp_login', array( $this, 'render_login_shortcode' ) );
 		add_shortcode( 'whitelabel_login', array( $this, 'render_login_shortcode' ) );
 		add_shortcode( 'wl_login', array( $this, 'render_login_shortcode' ) );
 	}
@@ -75,14 +76,22 @@ final class Frontend {
 		}
 
 		$content = (string) $post->post_content;
-		if ( ! has_shortcode( $content, 'whitelabel_login' ) && ! has_shortcode( $content, 'wl_login' ) ) {
+		$shortcodes = array( 'wlwp_login', 'whitelabel_login', 'wl_login' );
+		$found      = false;
+		foreach ( $shortcodes as $shortcode ) {
+			if ( has_shortcode( $content, $shortcode ) ) {
+				$found = true;
+				break;
+			}
+		}
+		if ( ! $found ) {
 			return;
 		}
 
 		$this->rendering_default_login = true;
 		$GLOBALS['pagenow']            = 'wp-login.php';
 
-		wl_login_render_default_login_page();
+		wlwp_render_default_login_page();
 		exit;
 	}
 
@@ -112,12 +121,12 @@ final class Frontend {
 			if ( 'failed' === $status ) {
 				$errors->add(
 					'incorrect_password',
-					__( '<strong>Error:</strong> The username or password you entered is incorrect.', 'whitelabel' )
+					__( '<strong>Error:</strong> The username or password you entered is incorrect.', 'whitelabel-login-customizer' )
 				);
 			}
 
 			if ( ! empty( $_GET['pwdreset'] ) ) {
-				$errors->add( 'pwdreset', __( 'Check your email for the password reset link.', 'whitelabel' ), 'message' );
+				$errors->add( 'pwdreset', __( 'Check your email for the password reset link.', 'whitelabel-login-customizer' ), 'message' );
 			}
 		}
 
@@ -152,7 +161,9 @@ final class Frontend {
 	 * @return bool
 	 */
 	private function is_login_post() {
-		$method = isset( $_SERVER['REQUEST_METHOD'] ) ? strtoupper( (string) $_SERVER['REQUEST_METHOD'] ) : 'GET';
+		$method = isset( $_SERVER['REQUEST_METHOD'] )
+			? strtoupper( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) )
+			: 'GET';
 
 		return $this->is_wp_login_request() && 'POST' === $method;
 	}
@@ -298,17 +309,17 @@ final class Frontend {
 		}
 
 		if ( false !== strpos( (string) Settings::get( 'font_family' ), 'Rubik' ) ) {
-			wp_enqueue_style( 'wl-rubik-font', 'https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap', array(), '1.0' );
+			wp_enqueue_style( 'wlwp-rubik-font', 'https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap', array(), '1.0' );
 		}
 
 		wp_enqueue_style(
-			'wl-login',
-			WL_LOGIN_URL . 'public/css/login.css',
+			'wlwp-login',
+			WLWP_URL . 'public/css/login.css',
 			array( 'login' ),
-			WL_LOGIN_VERSION
+			WLWP_VERSION
 		);
 
-		wp_add_inline_style( 'wl-login', self::get_css( 'body.login' ) );
+		wp_add_inline_style( 'wlwp-login', self::get_css( 'body.login' ) );
 	}
 
 	/**
@@ -322,7 +333,7 @@ final class Frontend {
 			return $classes;
 		}
 
-		$classes[] = 'wl-login-customized';
+		$classes[] = 'wlwp-login-customized';
 
 		return $classes;
 	}
@@ -394,7 +405,7 @@ final class Frontend {
 			return $message;
 		}
 
-		return '<p class="wl-login-message">' . Settings::format_rich_text( $custom ) . '</p>' . $message; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Output is sanitized by Settings::format_rich_text().
+		return '<p class="wlwp-login-message">' . Settings::format_rich_text( $custom ) . '</p>' . $message; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Output is sanitized by Settings::format_rich_text().
 	}
 
 	/**
@@ -410,7 +421,7 @@ final class Frontend {
 			return;
 		}
 
-		echo '<p class="wl-login-footer">' . Settings::format_rich_text( $custom ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Output is sanitized by Settings::format_rich_text().
+		echo '<p class="wlwp-login-footer">' . Settings::format_rich_text( $custom ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Output is sanitized by Settings::format_rich_text().
 	}
 
 	/**
@@ -536,83 +547,83 @@ final class Frontend {
 		$s = $scope . ' ';
 
 		$css .= $scope . " {\n";
-		$css .= "\tbackground-color: var(--wl-bg);\n";
-		$css .= "\tbackground-image: var(--wl-bg-image);\n";
-		$css .= "\tbackground-repeat: var(--wl-bg-repeat);\n";
-		$css .= "\tbackground-position: var(--wl-bg-position);\n";
-		$css .= "\tbackground-size: var(--wl-bg-size);\n";
-		$css .= "\tbackground-attachment: var(--wl-bg-attachment);\n";
-		$css .= "\tcolor: var(--wl-text);\n";
-		$css .= "\tfont-family: var(--wl-font);\n";
-		$css .= "\tfont-size: var(--wl-font-size);\n";
+		$css .= "\tbackground-color: var(--wlwp-bg);\n";
+		$css .= "\tbackground-image: var(--wlwp-bg-image);\n";
+		$css .= "\tbackground-repeat: var(--wlwp-bg-repeat);\n";
+		$css .= "\tbackground-position: var(--wlwp-bg-position);\n";
+		$css .= "\tbackground-size: var(--wlwp-bg-size);\n";
+		$css .= "\tbackground-attachment: var(--wlwp-bg-attachment);\n";
+		$css .= "\tcolor: var(--wlwp-text);\n";
+		$css .= "\tfont-family: var(--wlwp-font);\n";
+		$css .= "\tfont-size: var(--wlwp-font-size);\n";
 		$css .= "}\n\n";
 
-		$css .= $s . "#login {\n\twidth: var(--wl-form-width);\n\tmax-width: 96%;\n}\n\n";
+		$css .= $s . "#login {\n\twidth: var(--wlwp-form-width);\n\tmax-width: 96%;\n}\n\n";
 
 		$css .= $s . "#login h1 {\n\tmargin: 0 0 24px;\n}\n\n";
 
 		if ( '' !== $logo_url ) {
 			$css .= $s . "#login h1 a {\n";
-			$css .= "\tbackground-image: var(--wl-logo-image);\n";
+			$css .= "\tbackground-image: var(--wlwp-logo-image);\n";
 			$css .= "\tbackground-position: center center;\n";
 			$css .= "\tbackground-repeat: no-repeat;\n";
 			$css .= "\tbackground-size: contain;\n";
-			$css .= "\twidth: var(--wl-logo-width);\n";
-			$css .= "\theight: var(--wl-logo-height);\n";
+			$css .= "\twidth: var(--wlwp-logo-width);\n";
+			$css .= "\theight: var(--wlwp-logo-height);\n";
 			$css .= "\tmax-width: 100%;\n";
 			$css .= "\ttext-indent: -9999px;\n";
 			$css .= "}\n\n";
 		}
 
 		$css .= $s . "#login form {\n";
-		$css .= "\tbackground-color: var(--wl-form-bg);\n";
-		$css .= "\tborder: var(--wl-form-border-width) solid var(--wl-form-border-color);\n";
-		$css .= "\tborder-radius: var(--wl-form-radius);\n";
-		$css .= "\tbox-shadow: var(--wl-form-shadow);\n";
-		$css .= "\tpadding: var(--wl-form-padding);\n";
+		$css .= "\tbackground-color: var(--wlwp-form-bg);\n";
+		$css .= "\tborder: var(--wlwp-form-border-width) solid var(--wlwp-form-border-color);\n";
+		$css .= "\tborder-radius: var(--wlwp-form-radius);\n";
+		$css .= "\tbox-shadow: var(--wlwp-form-shadow);\n";
+		$css .= "\tpadding: var(--wlwp-form-padding);\n";
 		$css .= "}\n\n";
 
 		$css .= $s . "#login form .input,\n" . $s . "#login form input[type=text],\n" . $s . "#login form input[type=password],\n" . $s . "#login form input[type=email],\n" . $s . "#login form input[type=number] {\n";
-		$css .= "\tbackground-color: var(--wl-field-bg);\n";
-		$css .= "\tcolor: var(--wl-field-text);\n";
-		$css .= "\tborder: 1px solid var(--wl-field-border);\n";
-		$css .= "\tborder-radius: var(--wl-field-radius);\n";
-		$css .= "\tfont-size: var(--wl-font-size);\n";
+		$css .= "\tbackground-color: var(--wlwp-field-bg);\n";
+		$css .= "\tcolor: var(--wlwp-field-text);\n";
+		$css .= "\tborder: 1px solid var(--wlwp-field-border);\n";
+		$css .= "\tborder-radius: var(--wlwp-field-radius);\n";
+		$css .= "\tfont-size: var(--wlwp-font-size);\n";
 		$css .= "\tbox-shadow: none;\n";
 		$css .= "}\n\n";
 
 		$css .= $s . "#login form .input::placeholder {\n";
-		$css .= "\tcolor: var(--wl-field-placeholder);\n";
+		$css .= "\tcolor: var(--wlwp-field-placeholder);\n";
 		$css .= "\topacity: 1;\n";
 		$css .= "}\n\n";
 
 		$css .= $s . "#login form .input:focus {\n";
-		$css .= "\tborder-color: var(--wl-field-focus);\n";
-		$css .= "\tbox-shadow: 0 0 0 3px var(--wl-field-focus-ring);\n";
+		$css .= "\tborder-color: var(--wlwp-field-focus);\n";
+		$css .= "\tbox-shadow: 0 0 0 3px var(--wlwp-field-focus-ring);\n";
 		$css .= "\toutline: 2px solid transparent;\n";
 		$css .= "}\n\n";
 
 		$css .= $s . "#login form input[type=submit],\n" . $s . "#login form .button-primary,\n" . $s . "#login .wp-core-ui .button-primary {\n";
-		$css .= "\tbackground-color: var(--wl-button-bg);\n";
-		$css .= "\tborder-color: var(--wl-button-bg);\n";
-		$css .= "\tborder-radius: var(--wl-button-radius);\n";
-		$css .= "\tcolor: var(--wl-button-text);\n";
-		$css .= "\tfont-size: var(--wl-font-size);\n";
+		$css .= "\tbackground-color: var(--wlwp-button-bg);\n";
+		$css .= "\tborder-color: var(--wlwp-button-bg);\n";
+		$css .= "\tborder-radius: var(--wlwp-button-radius);\n";
+		$css .= "\tcolor: var(--wlwp-button-text);\n";
+		$css .= "\tfont-size: var(--wlwp-font-size);\n";
 		$css .= "\ttext-shadow: none;\n";
 		$css .= "\tbox-shadow: none;\n";
 		$css .= "}\n\n";
 
 		$css .= $s . "#login form input[type=submit]:hover,\n" . $s . "#login form .button-primary:hover,\n" . $s . "#login .wp-core-ui .button-primary:hover {\n";
-		$css .= "\tbackground-color: var(--wl-button-hover);\n";
-		$css .= "\tborder-color: var(--wl-button-hover);\n";
-		$css .= "\tcolor: var(--wl-button-hover-text);\n";
+		$css .= "\tbackground-color: var(--wlwp-button-hover);\n";
+		$css .= "\tborder-color: var(--wlwp-button-hover);\n";
+		$css .= "\tcolor: var(--wlwp-button-hover-text);\n";
 		$css .= "}\n\n";
 
-		$css .= $s . "#login label,\n" . $s . "#login .forgetmenot label {\n\tcolor: var(--wl-form-text);\n}\n\n";
-		$css .= $s . "#login input[type=checkbox] {\n\taccent-color: var(--wl-accent);\n}\n\n";
-		$css .= $s . "#login #nav a,\n" . $s . "#login #backtoblog a,\n" . $scope . " .message a {\n\tcolor: var(--wl-link);\n}\n\n";
-		$css .= $s . "#login #nav a:hover,\n" . $s . "#login #backtoblog a:hover,\n" . $scope . " .message a:hover {\n\tcolor: var(--wl-link-hover);\n\ttext-decoration: underline;\n\ttext-underline-offset: 3px;\n}\n\n";
-		$css .= $s . "#login .wl-login-message,\n" . $scope . " .wl-login-footer,\n" . $scope . " .message {\n\tcolor: var(--wl-text);\n}\n\n";
+		$css .= $s . "#login label,\n" . $s . "#login .forgetmenot label {\n\tcolor: var(--wlwp-form-text);\n}\n\n";
+		$css .= $s . "#login input[type=checkbox] {\n\taccent-color: var(--wlwp-accent);\n}\n\n";
+		$css .= $s . "#login #nav a,\n" . $s . "#login #backtoblog a,\n" . $scope . " .message a {\n\tcolor: var(--wlwp-link);\n}\n\n";
+		$css .= $s . "#login #nav a:hover,\n" . $s . "#login #backtoblog a:hover,\n" . $scope . " .message a:hover {\n\tcolor: var(--wlwp-link-hover);\n\ttext-decoration: underline;\n\ttext-underline-offset: 3px;\n}\n\n";
+		$css .= $s . "#login .wlwp-login-message,\n" . $scope . " .wlwp-login-footer,\n" . $scope . " .message {\n\tcolor: var(--wlwp-text);\n}\n\n";
 
 		if ( Settings::get( 'hide_register' ) ) {
 			$css .= $s . "a.wp-login-register { display: none !important; }\n";
@@ -683,55 +694,55 @@ final class Frontend {
 
 		// All values have been sanitized by Settings; absint prevents unit injection.
 		return array(
-			'--wl-bg'               => Settings::get( 'bg_color' ),
-			'--wl-logo-image'       => $logo_css,
-			'--wl-logo-width'       => max( 1, absint( Settings::get( 'logo_width' ) ) ) . 'px',
-			'--wl-logo-height'      => max( 1, absint( Settings::get( 'logo_height' ) ) ) . 'px',
-			'--wl-bg-image'         => $bg_css,
-			'--wl-bg-repeat'        => Settings::get( 'bg_repeat' ),
-			'--wl-bg-position'      => Settings::get( 'bg_position' ),
-			'--wl-bg-size'          => Settings::get( 'bg_size' ),
-			'--wl-bg-attachment'    => Settings::get( 'bg_attachment' ),
-			'--wl-font'             => '' !== Settings::get( 'font_family' )
+			'--wlwp-bg'               => Settings::get( 'bg_color' ),
+			'--wlwp-logo-image'       => $logo_css,
+			'--wlwp-logo-width'       => max( 1, absint( Settings::get( 'logo_width' ) ) ) . 'px',
+			'--wlwp-logo-height'      => max( 1, absint( Settings::get( 'logo_height' ) ) ) . 'px',
+			'--wlwp-bg-image'         => $bg_css,
+			'--wlwp-bg-repeat'        => Settings::get( 'bg_repeat' ),
+			'--wlwp-bg-position'      => Settings::get( 'bg_position' ),
+			'--wlwp-bg-size'          => Settings::get( 'bg_size' ),
+			'--wlwp-bg-attachment'    => Settings::get( 'bg_attachment' ),
+			'--wlwp-font'             => '' !== Settings::get( 'font_family' )
 				? Settings::get( 'font_family' )
 				: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif',
-			'--wl-font-size'        => max( 8, absint( Settings::get( 'font_size' ) ) ) . 'px',
-			'--wl-form-width'       => max( 200, absint( Settings::get( 'form_width' ) ) ) . 'px',
-			'--wl-form-padding'     => absint( Settings::get( 'form_padding' ) ) . 'px',
-			'--wl-form-bg'          => Settings::get( 'form_bg_color' ),
-			'--wl-form-text'        => Settings::get( 'form_text_color' ),
-			'--wl-form-border-color'=> Settings::get( 'form_border_color' ),
-			'--wl-form-border-width'=> absint( Settings::get( 'form_border_width' ) ) . 'px',
-			'--wl-form-radius'      => absint( Settings::get( 'form_radius' ) ) . 'px',
-			'--wl-form-shadow'      => $shadow,
-			'--wl-field-bg'         => Settings::get( 'field_bg_color' ),
-			'--wl-field-text'       => Settings::get( 'field_text_color' ),
-			'--wl-field-placeholder'=> Settings::get( 'field_placeholder_color' ),
-			'--wl-field-border'     => Settings::get( 'field_border_color' ),
-			'--wl-field-focus'      => Settings::get( 'field_focus_color' ),
-			'--wl-field-focus-ring' => self::rgba( Settings::get( 'field_focus_color' ), 0.25 ),
-			'--wl-field-radius'     => absint( Settings::get( 'field_radius' ) ) . 'px',
-			'--wl-button-bg'        => Settings::get( 'button_bg_color' ),
-			'--wl-button-hover'     => Settings::get( 'button_hover_color' ),
-			'--wl-button-text'      => Settings::get( 'button_text_color' ),
-			'--wl-button-hover-text'=> Settings::get( 'button_text_hover_color' ),
-			'--wl-button-radius'    => absint( Settings::get( 'button_radius' ) ) . 'px',
-			'--wl-accent'           => Settings::get( 'checkbox_color' ),
-			'--wl-text'             => Settings::get( 'text_color' ),
-			'--wl-link'             => Settings::get( 'link_color' ),
-			'--wl-link-hover'       => Settings::get( 'link_hover_color' ),
+			'--wlwp-font-size'        => max( 8, absint( Settings::get( 'font_size' ) ) ) . 'px',
+			'--wlwp-form-width'       => max( 200, absint( Settings::get( 'form_width' ) ) ) . 'px',
+			'--wlwp-form-padding'     => absint( Settings::get( 'form_padding' ) ) . 'px',
+			'--wlwp-form-bg'          => Settings::get( 'form_bg_color' ),
+			'--wlwp-form-text'        => Settings::get( 'form_text_color' ),
+			'--wlwp-form-border-color'=> Settings::get( 'form_border_color' ),
+			'--wlwp-form-border-width'=> absint( Settings::get( 'form_border_width' ) ) . 'px',
+			'--wlwp-form-radius'      => absint( Settings::get( 'form_radius' ) ) . 'px',
+			'--wlwp-form-shadow'      => $shadow,
+			'--wlwp-field-bg'         => Settings::get( 'field_bg_color' ),
+			'--wlwp-field-text'       => Settings::get( 'field_text_color' ),
+			'--wlwp-field-placeholder'=> Settings::get( 'field_placeholder_color' ),
+			'--wlwp-field-border'     => Settings::get( 'field_border_color' ),
+			'--wlwp-field-focus'      => Settings::get( 'field_focus_color' ),
+			'--wlwp-field-focus-ring' => self::rgba( Settings::get( 'field_focus_color' ), 0.25 ),
+			'--wlwp-field-radius'     => absint( Settings::get( 'field_radius' ) ) . 'px',
+			'--wlwp-button-bg'        => Settings::get( 'button_bg_color' ),
+			'--wlwp-button-hover'     => Settings::get( 'button_hover_color' ),
+			'--wlwp-button-text'      => Settings::get( 'button_text_color' ),
+			'--wlwp-button-hover-text'=> Settings::get( 'button_text_hover_color' ),
+			'--wlwp-button-radius'    => absint( Settings::get( 'button_radius' ) ) . 'px',
+			'--wlwp-accent'           => Settings::get( 'checkbox_color' ),
+			'--wlwp-text'             => Settings::get( 'text_color' ),
+			'--wlwp-link'             => Settings::get( 'link_color' ),
+			'--wlwp-link-hover'       => Settings::get( 'link_hover_color' ),
 		);
 	}
 }
 
-if ( ! function_exists( __NAMESPACE__ . '\\wl_login_render_default_login_page' ) ) {
+if ( ! function_exists( __NAMESPACE__ . '\\wlwp_render_default_login_page' ) ) {
 	/**
 	 * Include wp-login.php with the variables it expects in the global scope.
 	 *
 	 * The include normally happens inside a class method, so the globals are
 	 * imported explicitly to avoid undefined-variable notices on the stock screen.
 	 */
-	function wl_login_render_default_login_page() {
+	function wlwp_render_default_login_page() {
 		global $action, $error, $errors, $interim_login, $user_login, $user_email;
 		global $user, $redirect_to, $requested_redirect_to, $secure_cookie;
 		global $customize_login, $reauth, $login_link_separator, $rememberme;

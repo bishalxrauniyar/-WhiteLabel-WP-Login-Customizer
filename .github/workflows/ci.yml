@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: PHP lint, JS syntax and plugin check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout plugin
+        uses: actions/checkout@v4
+        with:
+          path: whitelabel-login-customizer
+
+      - name: Set up PHP and WP-CLI
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: wp-cli
+          coverage: none
+
+      - name: Set up WordPress for plugin check
+        run: |
+          sudo service mysql start
+          mysql -e 'CREATE DATABASE IF NOT EXISTS wordpress;'
+          wp core download --path=wp --version=latest
+          wp config create --path=wp --dbname=wordpress --dbuser=root --dbpass='' --dbhost=localhost --skip-check
+          wp core install --path=wp \
+            --url=http://example.test \
+            --title=CI \
+            --admin_user=admin \
+            --admin_password=password \
+            --admin_email=admin@example.test \
+            --skip-email
+
+      - name: Copy plugin into WordPress
+        run: |
+          mkdir -p wp/wp-content/plugins
+          rsync -a \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='.gitignore' \
+            --exclude='.gitattributes' \
+            whitelabel-login-customizer/ wp/wp-content/plugins/whitelabel-login-customizer/
+
+      - name: PHP lint
+        run: find whitelabel-login-customizer -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: JavaScript syntax check
+        run: node --check whitelabel-login-customizer/admin/js/admin.js
+
+      - name: WordPress plugin check
+        run: wp plugin check whitelabel-login-customizer --path=wp --format=table

@@ -76,7 +76,7 @@ final class Settings {
 	 * @return array<string,mixed>
 	 */
 	public static function get_options() {
-		$saved = get_option( WL_LOGIN_OPTION, array() );
+		$saved = get_option( WLWP_OPTION, array() );
 		$saved = is_array( $saved ) ? $saved : array();
 
 		/**
@@ -84,7 +84,7 @@ final class Settings {
 		 *
 		 * @param array $options Settings merged with defaults.
 		 */
-		return apply_filters( 'wl_login_options', wp_parse_args( $saved, self::get_defaults() ) );
+		return apply_filters( 'wlwp_login_options', wp_parse_args( $saved, self::get_defaults() ) );
 	}
 
 	/**
@@ -105,8 +105,8 @@ final class Settings {
 	 */
 	public static function register() {
 		register_setting(
-			'wl_login_group',
-			WL_LOGIN_OPTION,
+			'wlwp_login_group',
+			WLWP_OPTION,
 			array(
 				'type'              => 'array',
 				'sanitize_callback' => array( __CLASS__, 'sanitize' ),
@@ -119,7 +119,7 @@ final class Settings {
 	 * Restore defaults.
 	 */
 	public static function reset() {
-		update_option( WL_LOGIN_OPTION, self::get_defaults(), false );
+		update_option( WLWP_OPTION, self::get_defaults(), false );
 	}
 
 	/**
@@ -301,13 +301,13 @@ final class Settings {
 	 */
 	public static function get_font_choices() {
 		return array(
-			'Rubik, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' => __( 'Rubik (White Label WP)', 'whitelabel' ),
-			''                                        => __( 'Default (system font stack)', 'whitelabel' ),
-			'Arial, Helvetica, sans-serif'            => __( 'Arial / Helvetica', 'whitelabel' ),
-			'Georgia, "Times New Roman", serif'       => __( 'Georgia / Times New Roman', 'whitelabel' ),
-			'"Trebuchet MS", sans-serif'              => __( 'Trebuchet MS', 'whitelabel' ),
-			'"Courier New", Courier, monospace'       => __( 'Courier New', 'whitelabel' ),
-			'Verdana, Geneva, sans-serif'             => __( 'Verdana', 'whitelabel' ),
+			'Rubik, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' => __( 'Rubik (White Label WP)', 'whitelabel-login-customizer' ),
+			''                                        => __( 'Default (system font stack)', 'whitelabel-login-customizer' ),
+			'Arial, Helvetica, sans-serif'            => __( 'Arial / Helvetica', 'whitelabel-login-customizer' ),
+			'Georgia, "Times New Roman", serif'       => __( 'Georgia / Times New Roman', 'whitelabel-login-customizer' ),
+			'"Trebuchet MS", sans-serif'              => __( 'Trebuchet MS', 'whitelabel-login-customizer' ),
+			'"Courier New", Courier, monospace'       => __( 'Courier New', 'whitelabel-login-customizer' ),
+			'Verdana, Geneva, sans-serif'             => __( 'Verdana', 'whitelabel-login-customizer' ),
 		);
 	}
 
@@ -318,9 +318,9 @@ final class Settings {
 	 */
 	public static function get_shadow_choices() {
 		return array(
-			'none'   => __( 'None', 'whitelabel' ),
-			'subtle' => __( 'Subtle', 'whitelabel' ),
-			'strong' => __( 'Strong', 'whitelabel' ),
+			'none'   => __( 'None', 'whitelabel-login-customizer' ),
+			'subtle' => __( 'Subtle', 'whitelabel-login-customizer' ),
+			'strong' => __( 'Strong', 'whitelabel-login-customizer' ),
 		);
 	}
 
@@ -332,7 +332,7 @@ final class Settings {
 	public static function get_palettes() {
 		return array(
 			'brand' => array(
-				'label'    => __( 'White Label WP', 'whitelabel' ),
+				'label'    => __( 'White Label WP', 'whitelabel-login-customizer' ),
 				'swatch'   => array( '#000000', '#1e1e1e', '#ebf2ff', '#00aeef' ),
 				'colors'   => array(
 					'bg_color'                => '#ebf2ff',
@@ -357,7 +357,7 @@ final class Settings {
 				),
 			),
 			'midnight' => array(
-				'label'    => __( 'Midnight', 'whitelabel' ),
+				'label'    => __( 'Midnight', 'whitelabel-login-customizer' ),
 				'swatch'   => array( '#12161c', '#1c222b', '#38bdf8', '#e6edf3' ),
 				'colors'   => array(
 					'bg_color'                => '#12161c',
@@ -382,7 +382,7 @@ final class Settings {
 				),
 			),
 			'sand' => array(
-				'label'    => __( 'Warm Sand', 'whitelabel' ),
+				'label'    => __( 'Warm Sand', 'whitelabel-login-customizer' ),
 				'swatch'   => array( '#f6f1ea', '#fffaf3', '#b76e3c', '#3b3128' ),
 				'colors'   => array(
 					'bg_color'                => '#f6f1ea',
@@ -407,7 +407,7 @@ final class Settings {
 				),
 			),
 			'forest' => array(
-				'label'    => __( 'Forest', 'whitelabel' ),
+				'label'    => __( 'Forest', 'whitelabel-login-customizer' ),
 				'swatch'   => array( '#eef5ef', '#ffffff', '#2f6b46', '#1f3327' ),
 				'colors'   => array(
 					'bg_color'                => '#eef5ef',
@@ -432,7 +432,7 @@ final class Settings {
 				),
 			),
 			'plum' => array(
-				'label'    => __( 'Plum', 'whitelabel' ),
+				'label'    => __( 'Plum', 'whitelabel-login-customizer' ),
 				'swatch'   => array( '#f7f2fb', '#ffffff', '#7c3aed', '#2f1f3d' ),
 				'colors'   => array(
 					'bg_color'                => '#f7f2fb',

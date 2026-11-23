@@ -21,14 +21,14 @@ jobs:
 
       - name: Build plugin ZIP
         run: |
-          git archive --format=zip --prefix=whitelabel/ --output=whitelabel.zip "$GITHUB_REF_NAME"
+          git archive --format=zip --prefix=whitelabel-login-customizer/ --output=whitelabel-login-customizer.zip "$GITHUB_REF_NAME"
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
-          files: whitelabel.zip
+          files: whitelabel-login-customizer.zip
           generate_release_notes: true
           draft: false
           prerelease: false
