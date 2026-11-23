@@ -45,11 +45,8 @@ jobs:
 
       - name: Install latest WP-CLI
         run: |
-          mkdir -p "$HOME/.local/bin"
-          curl -fsSL -o "$HOME/.local/bin/wp" https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-          chmod +x "$HOME/.local/bin/wp"
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          "$HOME/.local/bin/wp" --version
+          curl -fsSL -o wp-cli.phar https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          php wp-cli.phar --version
 
       - name: Set up WordPress for plugin check
         run: |
@@ -80,4 +77,4 @@ jobs:
         run: node --check whitelabel-login-customizer/admin/js/admin.js
 
       - name: WordPress plugin check
-        run: wp plugin check whitelabel-login-customizer --path=wp --format=table
+        run: php wp-cli.phar plugin check whitelabel-login-customizer --path=wp --format=table
